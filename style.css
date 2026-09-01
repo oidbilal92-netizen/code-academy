@@ -45,7 +45,6 @@ body {
     margin: 16px 0 32px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
-    backdrop-filter: blur(10px);
     transition: var(--transition);
 }
 
@@ -162,23 +161,6 @@ body {
     overflow: hidden;
 }
 
-.track-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    opacity: 0;
-    transition: var(--transition);
-    border-radius: var(--radius);
-}
-
-.track-card:hover::before {
-    opacity: 0.08;
-}
-
 .track-card:hover {
     transform: translateY(-6px) scale(1.02);
     border-color: var(--primary);
@@ -190,7 +172,6 @@ body {
     font-size: 44px;
     margin-bottom: 10px;
     color: var(--primary);
-    position: relative;
 }
 
 .track-card .badge {
@@ -199,7 +180,6 @@ body {
     color: white;
     padding: 3px 14px;
     border-radius: 20px;
-    position: relative;
     display: inline-block;
 }
 
@@ -210,7 +190,6 @@ body {
     border-radius: 10px;
     margin: 10px 0;
     overflow: hidden;
-    position: relative;
 }
 
 .progress-fill {
@@ -220,7 +199,7 @@ body {
     transition: width 0.8s ease;
 }
 
-/* ===== لوحة الدرس ===== */
+/* ===== صفحة الدرس ===== */
 .lesson-panel {
     background: var(--card);
     border-radius: var(--radius);
@@ -281,14 +260,70 @@ body {
     border-color: var(--primary);
 }
 
+/* ===== صورة الدرس ===== */
+.lesson-image {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.lesson-image img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+/* ===== استخدامات اللغة ===== */
+.language-uses {
+    background: var(--bg);
+    padding: 24px;
+    border-radius: var(--radius);
+    margin: 20px 0;
+    border: 1px solid var(--border);
+}
+
+.language-uses h3 {
+    margin-bottom: 16px;
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.language-uses ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.language-uses ul li {
+    padding: 8px 16px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.language-uses ul li i {
+    color: var(--primary);
+}
+
+/* ===== الشرح ===== */
 .explanation {
     background: var(--bg);
     padding: 24px;
     border-radius: var(--radius);
-    margin-bottom: 24px;
+    margin: 20px 0;
     line-height: 1.9;
     font-size: 17px;
     border: 1px solid var(--border);
+}
+
+.explanation h3 {
+    color: var(--primary);
+    margin-bottom: 12px;
 }
 
 .explanation code {
@@ -300,133 +335,77 @@ body {
     color: var(--primary);
 }
 
-/* ===== محطة الكود ===== */
-.code-runner {
+/* ===== كود توضيحي ===== */
+.code-display {
     margin: 20px 0;
-}
-
-.code-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.code-header button {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 6px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    color: var(--text);
-}
-
-.code-header button:hover {
-    background: var(--primary);
-    color: white;
-}
-
-#codeEditor {
-    width: 100%;
     background: #0f172a;
-    color: #e2e8f0;
+    border-radius: var(--radius);
+    padding: 20px;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-    font-family: 'Fira Code', 'Cairo', monospace;
-    font-size: 15px;
-    resize: vertical;
-    min-height: 160px;
-    line-height: 1.6;
-    transition: var(--transition);
 }
 
-#codeEditor:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.code-actions {
-    display: flex;
-    gap: 12px;
-    margin: 12px 0;
-}
-
-.code-actions button {
-    padding: 10px 28px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-    background: var(--primary);
-    color: white;
-}
-
-.code-actions button:hover {
-    background: var(--primary-dark);
-    transform: scale(1.02);
-}
-
-#resetCodeBtn {
-    background: #64748b;
-}
-
-#resetCodeBtn:hover {
-    background: #475569;
-}
-
-.output-box {
-    background: #0f172a;
-    color: #e2e8f0;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    margin-top: 12px;
-}
-
-.output-label {
-    font-weight: 700;
+.code-display .code-header {
     color: #94a3b8;
-    display: block;
-    margin-bottom: 6px;
-}
-
-#outputContent {
-    font-family: 'Fira Code', monospace;
-    white-space: pre-wrap;
-    word-break: break-word;
-    min-height: 50px;
-    line-height: 1.6;
-}
-
-.expected-box {
-    background: #0f172a;
-    color: #fbbf24;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    margin-top: 12px;
-}
-
-.expected-label {
     font-weight: 700;
-    color: #fbbf24;
-    display: block;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
 }
 
-#expectedOutput {
+.code-display pre {
+    color: #e2e8f0;
     font-family: 'Fira Code', monospace;
+    font-size: 15px;
     white-space: pre-wrap;
     word-break: break-word;
-    min-height: 30px;
-    line-height: 1.6;
+    line-height: 1.8;
+    direction: ltr;
+    text-align: left;
+}
+
+.code-explanation {
+    color: #94a3b8;
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.8;
+    border-top: 1px solid #334155;
+    padding-top: 12px;
+}
+
+.code-explanation strong {
     color: #fbbf24;
 }
 
-/* ===== الاختبار ===== */
+/* ===== ملخص ===== */
+.summary-box {
+    background: var(--bg);
+    padding: 24px;
+    border-radius: var(--radius);
+    margin: 20px 0;
+    border: 1px solid var(--border);
+}
+
+.summary-box h3 {
+    margin-bottom: 12px;
+    color: var(--primary);
+}
+
+.summary-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.summary-box ul li {
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.summary-box ul li::before {
+    content: "✅";
+    font-size: 18px;
+}
+
+/* ===== الاختبارات ===== */
 .quiz-section {
     margin: 24px 0;
     padding: 24px;
@@ -442,7 +421,7 @@ body {
 
 .quiz-question {
     font-size: 18px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     font-weight: 700;
 }
 
@@ -693,12 +672,8 @@ body {
         align-items: stretch;
         gap: 10px;
     }
-    .code-actions {
-        flex-wrap: wrap;
-    }
-    .code-actions button {
-        flex: 1;
-        min-width: 100px;
+    .language-uses ul {
+        grid-template-columns: 1fr;
     }
     .modal-content {
         padding: 24px;
