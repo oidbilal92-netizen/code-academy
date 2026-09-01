@@ -5,6 +5,22 @@ let score = parseInt(localStorage.getItem('proScore')) || 0;
 let completed = JSON.parse(localStorage.getItem('proCompleted')) || {};
 let userBadges = parseInt(localStorage.getItem('proBadges')) || 0;
 let lang = 'ar';
+let pyodideReady = false;
+
+// ===== تحميل Pyodide (مترجم Python داخل المتصفح) =====
+async function loadPyodide() {
+    if (window.pyodide) return window.pyodide;
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+    document.head.appendChild(script);
+    return new Promise((resolve) => {
+        script.onload = async () => {
+            window.pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
+            pyodideReady = true;
+            resolve(window.pyodide);
+        };
+    });
+}
 
 // ===== الإشعارات =====
 function showToast(msg, isError = false) {
@@ -12,7 +28,7 @@ function showToast(msg, isError = false) {
     t.textContent = msg;
     t.className = 'toast' + (isError ? ' error' : '');
     t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
+    setTimeout(() => t.style.display = 'none', 3500);
 }
 
 // ===== حفظ التقدم =====
@@ -95,14 +111,43 @@ function renderLevel(trackIdx, levelIdx) {
     }
 }
 
-// ===== تشغيل الكود عبر JDoodle API (مجاني، بدون مفتاح) =====
+// ===== تشغيل الكود (نظام احترافي متعدد الطبقات) =====
 async function runCode() {
     const code = document.getElementById('codeEditor').value;
     const output = document.getElementById('outputContent');
     output.textContent = '⏳ جاري التنفيذ...';
 
+    // إذا كانت اللغة Python، استخدم Pyodide (يعمل داخل المتصفح بدون خوادم)
+    if (currentTrack && currentTrack.id === 'python') {
+        try {
+            if (!pyodideReady) {
+                output.textContent = '⏳ جاري تحميل مترجم Python...';
+                await loadPyodide();
+            }
+            // تنفيذ الكود مع التقاط المخرجات
+            window.pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+            `);
+            try {
+                window.pyodide.runPython(code);
+            } catch (e) {
+                // إذا كان الكود يحتوي على متغيرات، نستخدم exec
+                window.pyodide.runPython(`
+exec('''${code.replace(/'/g, "\\'")}''')
+                `);
+            }
+            const result = window.pyodide.runPython('sys.stdout.getvalue()');
+            output.textContent = result.trim() || '(لا يوجد مخرجات)';
+        } catch (e) {
+            output.textContent = '❌ خطأ: ' + e.message;
+        }
+        return;
+    }
+
+    // للغات الأخرى: استخدم JDoodle API مع نظام إعادة المحاولة
     let langMap = {
-        'python': 'python3',
         'javascript': 'nodejs',
         'cpp': 'cpp',
         'java': 'java',
@@ -113,15 +158,16 @@ async function runCode() {
         'go': 'go',
         'rust': 'rust'
     };
-    let lang = currentTrack ? (langMap[currentTrack.id] || 'python3') : 'python3';
+    let langId = currentTrack ? (langMap[currentTrack.id] || 'python3') : 'python3';
 
+    // محاولة JDoodle
     try {
         const res = await fetch('https://api.jdoodle.com/v1/execute', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 script: code,
-                language: lang,
+                language: langId,
                 versionIndex: '0'
             })
         });
@@ -134,7 +180,12 @@ async function runCode() {
             output.textContent = '❌ خطأ غير معروف';
         }
     } catch (e) {
-        output.textContent = '❌ فشل الاتصال بالخادم';
+        // في حالة فشل JDoodle، استخدم البديل (محاكاة المخرجات المتوقعة)
+        output.textContent = '⚠️ تعذر الاتصال بالخادم. جارٍ استخدام المخرجات المتوقعة...';
+        setTimeout(() => {
+            const expected = currentTrack.levels[currentLevelIndex].expected || '(لا يوجد مخرجات متوقعة)';
+            output.textContent = '🔮 المخرجات المتوقعة: ' + expected;
+        }, 1000);
     }
 }
 
@@ -209,6 +260,13 @@ function resetProgress() {
 // ===== الأحداث =====
 document.addEventListener('DOMContentLoaded', () => {
     renderTracks();
+    // تحميل Pyodide مسبقاً لـ Python
+    loadPyodide().then(() => {
+        console.log('✅ Pyodide جاهز لتشغيل Python');
+    }).catch(e => {
+        console.warn('⚠️ فشل تحميل Pyodide:', e);
+    });
+
     document.getElementById('runCodeBtn').addEventListener('click', runCode);
     document.getElementById('resetCodeBtn').addEventListener('click', () => {
         if (currentTrack) {
