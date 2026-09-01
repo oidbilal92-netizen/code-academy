@@ -161,6 +161,8 @@ function renderLevel(trackIdx, levelIdx) {
     document.getElementById('explanation').innerHTML = lvl.content;
     document.getElementById('codeEditor').value = lvl.code;
     document.getElementById('outputContent').textContent = '💡 قم بتشغيل الكود لترى النتيجة';
+    document.getElementById('expectedOutput').textContent = lvl.expected || '(غير محددة)';
+    
     const quiz = lvl.quiz;
     const quizBody = document.getElementById('quizBody');
     if (quiz) {
@@ -190,10 +192,11 @@ function renderLevel(trackIdx, levelIdx) {
     }
 }
 
-// ===== تشغيل الكود الاحترافي =====
+// ===== تشغيل الكود الاحترافي مع مقارنة المخرجات =====
 async function runCode() {
     const code = document.getElementById('codeEditor').value;
     const output = document.getElementById('outputContent');
+    const expected = document.getElementById('expectedOutput').textContent || '';
     
     if (currentTrack && currentTrack.id === 'python') {
         try {
@@ -222,13 +225,27 @@ exec('''${code.replace(/'/g, "\\'")}''')
             const result = pyodide.runPython('sys.stdout.getvalue()');
             const error = pyodide.runPython('sys.stderr.getvalue()');
             
+            let finalOutput = '';
             if (error) {
-                output.textContent = '❌ خطأ:\n' + error;
+                finalOutput = '❌ خطأ:\n' + error;
             } else if (result) {
-                output.textContent = result;
+                finalOutput = result;
             } else {
-                output.textContent = '✅ تم التنفيذ بنجاح (لا يوجد مخرجات)';
+                finalOutput = '✅ تم التنفيذ بنجاح (لا يوجد مخرجات)';
             }
+            
+            // مقارنة المخرجات مع المتوقع
+            if (expected && expected !== '(غير محددة)') {
+                const isMatch = finalOutput.trim() === expected.trim();
+                if (!isMatch) {
+                    finalOutput += `\n\n⚠️ المخرجات لا تطابق المتوقع!\n🔮 المتوقع: ${expected}`;
+                } else {
+                    finalOutput += `\n\n✅ المخرجات تطابق المتوقع!`;
+                }
+            }
+            
+            output.textContent = finalOutput;
+            
         } catch (e) {
             output.textContent = '❌ خطأ في التنفيذ:\n' + e.message;
         }
@@ -261,16 +278,30 @@ exec('''${code.replace(/'/g, "\\'")}''')
             })
         });
         const data = await res.json();
+        let finalOutput = '';
         if (data.output) {
-            output.textContent = data.output.trim() || '(لا يوجد مخرجات)';
+            finalOutput = data.output.trim() || '(لا يوجد مخرجات)';
         } else if (data.error) {
-            output.textContent = '❌ خطأ: ' + data.error;
+            finalOutput = '❌ خطأ: ' + data.error;
         } else {
-            output.textContent = '❌ خطأ غير معروف';
+            finalOutput = '❌ خطأ غير معروف';
         }
+        
+        // مقارنة المخرجات مع المتوقع
+        if (expected && expected !== '(غير محددة)') {
+            const isMatch = finalOutput.trim() === expected.trim();
+            if (!isMatch) {
+                finalOutput += `\n\n⚠️ المخرجات لا تطابق المتوقع!\n🔮 المتوقع: ${expected}`;
+            } else {
+                finalOutput += `\n\n✅ المخرجات تطابق المتوقع!`;
+            }
+        }
+        
+        output.textContent = finalOutput;
+        
     } catch (e) {
-        const expected = currentTrack.levels[currentLevelIndex].expected || '(لا توجد مخرجات متوقعة)';
-        output.textContent = '⚠️ تعذر الاتصال بالخادم.\n🔮 المخرجات المتوقعة:\n' + expected;
+        const expectedFallback = expected || '(لا توجد مخرجات متوقعة)';
+        output.textContent = `⚠️ تعذر الاتصال بالخادم.\n🔮 المخرجات المتوقعة:\n${expectedFallback}`;
     }
 }
 
@@ -380,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentTrack) {
             document.getElementById('codeEditor').value = currentTrack.levels[currentLevelIndex].code;
             document.getElementById('outputContent').textContent = '💡 قم بتشغيل الكود لترى النتيجة';
+            document.getElementById('expectedOutput').textContent = currentTrack.levels[currentLevelIndex].expected || '(غير محددة)';
         }
     });
     document.getElementById('copyCodeBtn').addEventListener('click', () => {
