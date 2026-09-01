@@ -95,27 +95,41 @@ function renderLevel(trackIdx, levelIdx) {
     }
 }
 
-// ===== تشغيل الكود =====
+// ===== تشغيل الكود عبر JDoodle API (مجاني، بدون مفتاح) =====
 async function runCode() {
     const code = document.getElementById('codeEditor').value;
     const output = document.getElementById('outputContent');
     output.textContent = '⏳ جاري التنفيذ...';
-    let langId = 'python';
-    if (currentTrack) {
-        const map = { 'python':'python', 'javascript':'javascript', 'cpp':'cpp', 'java':'java', 'csharp':'csharp', 'php':'php', 'swift':'swift', 'kotlin':'kotlin', 'go':'go', 'rust':'rust' };
-        langId = map[currentTrack.id] || 'python';
-    }
+
+    let langMap = {
+        'python': 'python3',
+        'javascript': 'nodejs',
+        'cpp': 'cpp',
+        'java': 'java',
+        'csharp': 'csharp',
+        'php': 'php',
+        'swift': 'swift',
+        'kotlin': 'kotlin',
+        'go': 'go',
+        'rust': 'rust'
+    };
+    let lang = currentTrack ? (langMap[currentTrack.id] || 'python3') : 'python3';
+
     try {
-        const res = await fetch('https://emkc.org/api/v2/piston/execute', {
+        const res = await fetch('https://api.jdoodle.com/v1/execute', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ language: langId, version: '*', files: [{ content: code }] })
+            body: JSON.stringify({
+                script: code,
+                language: lang,
+                versionIndex: '0'
+            })
         });
         const data = await res.json();
-        if (data.run && data.run.output) {
-            output.textContent = data.run.output.trim() || '(لا يوجد مخرجات)';
-        } else if (data.message) {
-            output.textContent = '❌ خطأ: ' + data.message;
+        if (data.output) {
+            output.textContent = data.output.trim() || '(لا يوجد مخرجات)';
+        } else if (data.error) {
+            output.textContent = '❌ خطأ: ' + data.error;
         } else {
             output.textContent = '❌ خطأ غير معروف';
         }
