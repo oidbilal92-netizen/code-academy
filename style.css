@@ -401,6 +401,31 @@ body {
     line-height: 1.6;
 }
 
+.expected-box {
+    background: #0f172a;
+    color: #fbbf24;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-top: 12px;
+}
+
+.expected-label {
+    font-weight: 700;
+    color: #fbbf24;
+    display: block;
+    margin-bottom: 6px;
+}
+
+#expectedOutput {
+    font-family: 'Fira Code', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 30px;
+    line-height: 1.6;
+    color: #fbbf24;
+}
+
 /* ===== الاختبار ===== */
 .quiz-section {
     margin: 24px 0;
