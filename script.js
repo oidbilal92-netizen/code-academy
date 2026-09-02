@@ -4,7 +4,6 @@ let currentLevelIndex = 0;
 let score = parseInt(localStorage.getItem('proScore')) || 0;
 let completed = JSON.parse(localStorage.getItem('proCompleted')) || {};
 let userBadges = parseInt(localStorage.getItem('proBadges')) || 0;
-let lang = 'ar';
 
 // ===== الإشعارات =====
 function showToast(msg, isError = false) {
@@ -12,11 +11,7 @@ function showToast(msg, isError = false) {
     t.textContent = msg;
     t.className = 'toast' + (isError ? ' error' : '');
     t.style.display = 'block';
-    t.style.animation = 'slideIn 0.5s ease';
-    setTimeout(() => {
-        t.style.animation = 'slideOut 0.5s ease';
-        setTimeout(() => t.style.display = 'none', 500);
-    }, 3500);
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
 }
 
 // ===== حفظ التقدم =====
@@ -37,12 +32,11 @@ function renderTracks() {
         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
         return `
             <div class="track-card" data-track="${idx}">
-                <i class="${t.icon}"></i>
-                <span>${t.name}</span>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progress}%"></div>
-                </div>
-                <div class="badge">${done}/${total}</div>
+                <div class="track-icon"><i class="${t.icon}"></i></div>
+                <h3>${t.name}</h3>
+                <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+                <span class="badge">${done}/${total}</span>
+                <button class="start-btn" onclick="openTrack(${idx})">ابدأ التعلم →</button>
             </div>
         `;
     }).join('');
@@ -51,12 +45,6 @@ function renderTracks() {
     document.getElementById('totalLessons').textContent = totalLessons;
     document.getElementById('userScore').textContent = score;
     document.getElementById('userBadges').textContent = userBadges;
-    document.querySelectorAll('.track-card').forEach(el => {
-        el.addEventListener('click', () => {
-            const idx = parseInt(el.dataset.track);
-            openTrack(idx);
-        });
-    });
 }
 
 // ===== فتح مسار =====
@@ -75,49 +63,40 @@ function renderLevel(trackIdx, levelIdx) {
     const uses = track.uses;
     currentLevelIndex = levelIdx;
 
-    // العنوان
     document.getElementById('lessonTitle').textContent = `${track.name} - ${lvl.title}`;
     document.getElementById('levelBadge').textContent = `مستوى ${lvl.id + 1}`;
 
-    // الصورة
-    const img = document.getElementById('lessonImg');
-    img.src = lvl.image || 'https://via.placeholder.com/600x300/2563eb/ffffff?text=درس+تعليمي';
-    img.alt = lvl.title;
+    document.getElementById('lessonVideo').src = lvl.video || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
 
-    // استخدامات اللغة
     const usesContent = document.getElementById('usesContent');
     usesContent.innerHTML = `
         <p><strong>${uses.overview}</strong></p>
-        <ul>
-            ${uses.fields.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('')}
-        </ul>
+        <ul>${uses.fields.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('')}</ul>
         <p style="margin-top:12px;"><strong>شركات تستخدم هذه اللغة:</strong> ${uses.companies.join(' - ')}</p>
     `;
 
-    // الشرح
     const content = lvl.content;
     document.getElementById('explanation').innerHTML = `
-        <h3>📖 مقدمة</h3>
-        <p>${content.intro}</p>
-        <h3>📘 شرح متعمق</h3>
-        <p>${content.explanation}</p>
-        <h3>🌍 استخدامات في الواقع</h3>
-        <p>${content.realLife}</p>
-        <h3>💡 لماذا هذا مهم؟</h3>
-        <p>${content.whyImportant}</p>
+        <h3>📖 مقدمة</h3><p>${content.intro}</p>
+        <h3>📘 شرح متعمق</h3><p>${content.explanation}</p>
+        <h3>🌍 استخدامات في الواقع</h3><p>${content.realLife}</p>
+        <h3>💡 لماذا هذا مهم؟</h3><p>${content.whyImportant}</p>
     `;
 
-    // الكود التوضيحي
-    document.querySelector('#codeExample code').textContent = content.codeExample;
-    document.getElementById('codeExplanation').innerHTML = `
-        <strong>📝 شرح الكود:</strong> ${content.codeExplanation}
-    `;
+    const codeElement = document.getElementById('codeExample');
+    const langMap = { 'python': 'python', 'javascript': 'javascript', 'java': 'java', 'cpp': 'cpp', 'csharp': 'csharp' };
+    const langId = langMap[track.id] || 'python';
+    codeElement.className = `language-${langId}`;
+    codeElement.textContent = content.codeExample;
+    if (window.Prism) {
+        Prism.highlightElement(codeElement);
+    }
 
-    // الملخص
+    document.getElementById('codeExplanation').innerHTML = `<strong>📝 شرح الكود:</strong> ${content.codeExplanation}`;
+
     const summaryList = document.getElementById('summaryList');
     summaryList.innerHTML = content.summary.map(s => `<li>${s}</li>`).join('');
 
-    // الاختبارات
     const quiz = lvl.quiz;
     const quizBody = document.getElementById('quizBody');
     let quizHTML = '';
@@ -125,67 +104,29 @@ function renderLevel(trackIdx, levelIdx) {
     if (quiz.multiple && quiz.multiple.length > 0) {
         quizHTML += `<h4>اختيار من متعدد</h4>`;
         quiz.multiple.forEach((q, idx) => {
-            quizHTML += `
-                <p class="quiz-question">${idx+1}. ${q.question}</p>
-                ${q.options.map((opt, i) => `
-                    <label class="quiz-option">
-                        <input type="radio" name="q${idx}" value="${i}" /> ${opt}
-                    </label>
-                `).join('')}
-            `;
+            quizHTML += `<p class="quiz-question">${idx+1}. ${q.question}</p>`;
+            q.options.forEach((opt, i) => {
+                quizHTML += `<label class="quiz-option"><input type="radio" name="q${idx}" value="${i}" /> ${opt}</label>`;
+            });
         });
     }
 
     if (quiz.truefalse && quiz.truefalse.length > 0) {
         quizHTML += `<h4>صح / خطأ</h4>`;
         quiz.truefalse.forEach((q, idx) => {
-            const id = `tf_${idx}`;
-            quizHTML += `
-                <p class="quiz-question">${idx+1}. ${q.question}</p>
-                <label class="quiz-option"><input type="radio" name="${id}" value="true" /> صح</label>
-                <label class="quiz-option"><input type="radio" name="${id}" value="false" /> خطأ</label>
-            `;
+            quizHTML += `<p class="quiz-question">${idx+1}. ${q.question}</p>`;
+            quizHTML += `<label class="quiz-option"><input type="radio" name="tf_${idx}" value="true" /> صح</label>`;
+            quizHTML += `<label class="quiz-option"><input type="radio" name="tf_${idx}" value="false" /> خطأ</label>`;
         });
     }
 
-    if (quiz.matching && quiz.matching.length > 0) {
-        quizHTML += `<h4>وصل</h4>`;
-        quiz.matching.forEach((q, idx) => {
-            quizHTML += `<p class="quiz-question">${q.question}</p>`;
-            const left = q.pairs.map(p => p[0]);
-            const right = q.pairs.map(p => p[1]);
-            quizHTML += `
-                <div style="display:flex;gap:20px;flex-wrap:wrap;margin:10px 0;">
-                    <div style="flex:1;">
-                        ${left.map((item, i) => `<div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:4px 0;">${item}</div>`).join('')}
-                    </div>
-                    <div style="flex:1;">
-                        ${right.map((item, i) => `<div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:4px 0;">${item}</div>`).join('')}
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    if (quiz.ordering && quiz.ordering.length > 0) {
-        quizHTML += `<h4>ترتيب</h4>`;
-        quiz.ordering.forEach((q, idx) => {
-            quizHTML += `
-                <p class="quiz-question">${q.question}</p>
-                ${q.steps.map((step, i) => `
-                    <div style="display:flex;align-items:center;gap:10px;margin:6px 0;">
-                        <span style="background:var(--primary);color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;">${i+1}</span>
-                        <span>${step}</span>
-                    </div>
-                `).join('')}
-            `;
-        });
-    }
-
-    quizBody.innerHTML = quizHTML || '<p>لا يوجد اختبارات لهذا الدرس.</p>';
+    quizBody.innerHTML = quizHTML || '<p>لا يوجد اختبارات.</p>';
     document.getElementById('quizResult').innerHTML = '';
 
-    // زر الإكمال
+    const totalLevels = track.levels.length;
+    document.getElementById('prevLevelBtn').disabled = levelIdx === 0;
+    document.getElementById('nextLevelBtn').disabled = levelIdx === totalLevels - 1;
+
     const key = track.id + '-' + lvl.id;
     const btn = document.getElementById('completeLevelBtn');
     if (completed[key]) {
@@ -199,53 +140,54 @@ function renderLevel(trackIdx, levelIdx) {
     }
 }
 
+// ===== التنقل بين المستويات =====
+function navigateLevel(direction) {
+    const track = currentTrack;
+    const newIndex = currentLevelIndex + direction;
+    if (newIndex < 0 || newIndex >= track.levels.length) return;
+    renderLevel(APP_DATA.tracks.indexOf(track), newIndex);
+}
+
 // ===== اختبار =====
 function submitQuiz() {
     const resultDiv = document.getElementById('quizResult');
-    let correctCount = 0;
-    let totalQuestions = 0;
+    let correct = 0, total = 0;
 
-    const multipleRadios = document.querySelectorAll('input[type="radio"][name^="q"]');
-    multipleRadios.forEach(radio => {
-        if (radio.checked) {
-            totalQuestions++;
-            const idx = parseInt(radio.name.replace('q', ''));
+    document.querySelectorAll('input[type="radio"][name^="q"]').forEach(r => {
+        if (r.checked) {
+            total++;
+            const idx = parseInt(r.name.replace('q', ''));
             const quiz = currentTrack.levels[currentLevelIndex].quiz;
-            if (quiz.multiple && quiz.multiple[idx] && parseInt(radio.value) === quiz.multiple[idx].correct) {
-                correctCount++;
-            }
+            if (quiz.multiple && quiz.multiple[idx] && parseInt(r.value) === quiz.multiple[idx].correct) correct++;
         }
     });
 
-    const tfRadios = document.querySelectorAll('input[type="radio"][name^="tf_"]');
     const tfGroups = {};
-    tfRadios.forEach(radio => {
-        if (radio.checked) {
-            if (!tfGroups[radio.name]) tfGroups[radio.name] = [];
-            tfGroups[radio.name].push(radio.value);
+    document.querySelectorAll('input[type="radio"][name^="tf_"]').forEach(r => {
+        if (r.checked) {
+            if (!tfGroups[r.name]) tfGroups[r.name] = [];
+            tfGroups[r.name].push(r.value);
         }
     });
     Object.keys(tfGroups).forEach((name, idx) => {
         if (tfGroups[name].length === 1) {
-            totalQuestions++;
+            total++;
             const quiz = currentTrack.levels[currentLevelIndex].quiz;
-            if (quiz.truefalse && quiz.truefalse[idx] && tfGroups[name][0] === String(quiz.truefalse[idx].correct)) {
-                correctCount++;
-            }
+            if (quiz.truefalse && quiz.truefalse[idx] && tfGroups[name][0] === String(quiz.truefalse[idx].correct)) correct++;
         }
     });
 
-    const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
-    if (percentage >= 70) {
-        const bonus = Math.min(10, Math.floor(percentage / 10));
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    if (pct >= 70) {
+        const bonus = Math.min(10, Math.floor(pct / 10));
         score += bonus;
         saveProgress();
-        resultDiv.innerHTML = `<span class="text-success">✅ نتيجة ممتازة! ${percentage}% (+${bonus} نقاط)</span>`;
-        showToast(`🌟 نتيجة ممتازة! +${bonus} نقاط`);
-    } else if (percentage >= 40) {
-        resultDiv.innerHTML = `<span class="text-warning">⚠️ نتيجة جيدة: ${percentage}% (حاول مرة أخرى للحصول على نقاط إضافية)</span>`;
+        resultDiv.innerHTML = `<span class="text-success">✅ ممتاز! ${pct}% (+${bonus} نقاط)</span>`;
+        showToast(`🌟 +${bonus} نقاط`);
+    } else if (pct >= 40) {
+        resultDiv.innerHTML = `<span class="text-warning">⚠️ جيد: ${pct}% (حاول مرة أخرى)</span>`;
     } else {
-        resultDiv.innerHTML = `<span class="text-danger">❌ نتيجة: ${percentage}% (راجع الدرس وحاول مرة أخرى)</span>`;
+        resultDiv.innerHTML = `<span class="text-danger">❌ ${pct}% (راجع الدرس)`;
     }
 }
 
@@ -254,10 +196,7 @@ function completeLevel() {
     const track = currentTrack;
     const lvl = track.levels[currentLevelIndex];
     const key = track.id + '-' + lvl.id;
-    if (completed[key]) {
-        showToast('✅ هذا الدرس مكتمل بالفعل', true);
-        return;
-    }
+    if (completed[key]) { showToast('✅ مكتمل', true); return; }
     completed[key] = true;
     score += 20;
     userBadges += 1;
@@ -286,33 +225,22 @@ function openProfile() {
 }
 
 function exportProgress() {
-    const data = {
-        user: 'developer',
-        score,
-        completed,
-        badges: userBadges,
-        exportDate: new Date().toISOString(),
-        totalLessons: APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0)
-    };
+    const data = { score, completed, badges: userBadges, exportDate: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `progress_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
-    showToast('📥 تم تصدير التقدم بنجاح');
+    showToast('📥 تم التصدير');
 }
 
 function resetProgress() {
-    if (confirm('⚠️ تحذير: هذا الإجراء سيمحو كل تقدمك. هل أنت متأكد؟')) {
-        localStorage.removeItem('proScore');
-        localStorage.removeItem('proCompleted');
-        localStorage.removeItem('proBadges');
-        score = 0;
-        completed = {};
-        userBadges = 0;
+    if (confirm('⚠️ حذف كل التقدم؟')) {
+        localStorage.clear();
+        score = 0; completed = {}; userBadges = 0;
         saveProgress();
         renderTracks();
-        showToast('🔄 تم إعادة تعيين التقدم');
+        showToast('🔄 تم إعادة التعيين');
         document.getElementById('profileModal').style.display = 'none';
     }
 }
@@ -321,15 +249,21 @@ function resetProgress() {
 document.addEventListener('DOMContentLoaded', () => {
     renderTracks();
 
-    document.getElementById('submitQuizBtn').addEventListener('click', submitQuiz);
-    document.getElementById('completeLevelBtn').addEventListener('click', completeLevel);
     document.getElementById('backBtn').addEventListener('click', goBack);
+    document.getElementById('prevLevelBtn').addEventListener('click', () => navigateLevel(-1));
+    document.getElementById('nextLevelBtn').addEventListener('click', () => navigateLevel(1));
+    document.getElementById('completeLevelBtn').addEventListener('click', completeLevel);
+    document.getElementById('submitQuizBtn').addEventListener('click', submitQuiz);
     document.getElementById('profileBtn').addEventListener('click', openProfile);
-    document.getElementById('closeProfile').addEventListener('click', () => {
-        document.getElementById('profileModal').style.display = 'none';
-    });
+    document.getElementById('closeProfile').addEventListener('click', () => document.getElementById('profileModal').style.display = 'none');
     document.getElementById('exportProgressBtn').addEventListener('click', exportProgress);
     document.getElementById('resetProgressBtn').addEventListener('click', resetProgress);
+
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        const code = document.getElementById('codeExample').textContent;
+        navigator.clipboard.writeText(code).then(() => showToast('📋 تم النسخ')).catch(() => showToast('❌ فشل', true));
+    });
+
     document.getElementById('themeToggle').addEventListener('click', () => {
         document.body.classList.toggle('dark');
         const icon = document.querySelector('#themeToggle i');
@@ -337,10 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.classList.toggle('fa-sun');
         localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
+
     document.getElementById('profileModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            document.getElementById('profileModal').style.display = 'none';
-        }
+        if (e.target === e.currentTarget) document.getElementById('profileModal').style.display = 'none';
     });
 
     if (localStorage.getItem('theme') === 'dark') {
@@ -349,5 +282,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     saveProgress();
-    console.log('🚀 المنصة النظرية المتكاملة جاهزة!');
+    console.log('🚀 المنصة الاحترافية جاهزة!');
 });
