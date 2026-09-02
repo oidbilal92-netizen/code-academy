@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>منصة التعلم الاحترافية 💡</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="extra-styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -33,6 +32,7 @@
             <p class="video-caption">🎯 شاهد هذا الفيديو لفهم الفرق بين لغات البرمجة ومتى تستخدم كل واحدة</p>
         </div>
 
+        <!-- ====== الإحصائيات ====== -->
         <div class="stats-grid">
             <div class="stat-card"><i class="fas fa-language"></i><h3 id="totalTracks">0</h3><p>لغات</p></div>
             <div class="stat-card"><i class="fas fa-book"></i><h3 id="totalLessons">0</h3><p>دروس</p></div>
@@ -40,24 +40,40 @@
             <div class="stat-card"><i class="fas fa-certificate"></i><h3 id="userBadges">0</h3><p>شهادات</p></div>
         </div>
 
-        <div class="tracks-container">
-            <h2><i class="fas fa-route"></i> اختر مسارك التعليمي</h2>
-            <div class="tracks-grid" id="trackGrid"></div>
+        <!-- ====== المحتوى الرئيسي (عمودين) ====== -->
+        <div class="main-content">
+            <!-- العمود الأيسر: المسارات -->
+            <div class="left-column">
+                <div class="tracks-container">
+                    <h2><i class="fas fa-route"></i> اختر مسارك التعليمي</h2>
+                    <div class="tracks-grid" id="trackGrid"></div>
+                </div>
+            </div>
+
+            <!-- العمود الأيمن: الشحطات الثلاث -->
+            <div class="right-column">
+                <!-- الشحطة 1: مشاريع عملية -->
+                <section class="side-card" id="projectsSection">
+                    <h3><i class="fas fa-project-diagram"></i> مشاريع عملية</h3>
+                    <div id="projectsContainer"></div>
+                </section>
+
+                <!-- الشحطة 2: تحديات اليوم -->
+                <section class="side-card" id="challengesSection">
+                    <h3><i class="fas fa-trophy"></i> تحديات اليوم</h3>
+                    <div id="challengesContainer"></div>
+                </section>
+
+                <!-- الشحطة 3: لوحة المتصدرين -->
+                <section class="side-card" id="leaderboardSection">
+                    <h3><i class="fas fa-crown"></i> لوحة المتصدرين</h3>
+                    <div id="leaderboardContainer"></div>
+                </section>
+            </div>
         </div>
-
-        <!-- ====== قسم المشاريع ====== -->
-        <section class="projects-section" id="projectsSection">
-            <h2><i class="fas fa-project-diagram"></i> مشاريع عملية</h2>
-            <div id="projectsContainer"></div>
-        </section>
-
-        <!-- ====== قسم التحديات ====== -->
-        <section class="challenges-section" id="challengesSection">
-            <h2><i class="fas fa-trophy"></i> تحديات اليوم</h2>
-            <div id="challengesContainer"></div>
-        </section>
     </section>
 
+    <!-- ====== صفحة الدرس ====== -->
     <section class="lesson-panel" id="lessonPanel" style="display:none;">
         <div class="lesson-header">
             <button id="backBtn"><i class="fas fa-arrow-right"></i> العودة</button>
@@ -101,6 +117,7 @@
         </div>
     </section>
 
+    <!-- ====== الملف الشخصي ====== -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <button id="closeProfile" class="modal-close"><i class="fas fa-times"></i></button>
@@ -126,9 +143,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
     <script src="data.js"></script>
-    <script src="details.js"></script>
     <script src="projects.js"></script>
     <script src="challenges.js"></script>
+    <script src="leaderboard.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
