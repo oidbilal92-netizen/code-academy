@@ -31,6 +31,7 @@ body {
     min-height: 100vh;
 }
 
+/* ===== شريط علوي ===== */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -62,6 +63,7 @@ body {
 
 .nav-actions button:hover { color: var(--primary); background: var(--bg); transform: scale(1.05); }
 
+/* ===== القسم الترحيبي ===== */
 .hero-section {
     text-align: center;
     padding: 40px 20px;
@@ -75,6 +77,7 @@ body {
 .hero-section h1 span { color: var(--accent); }
 .hero-section p { font-size: 18px; opacity: 0.9; margin-top: 8px; }
 
+/* ===== فيديو تعريفي ===== */
 .intro-video {
     background: var(--card);
     padding: 24px;
@@ -89,6 +92,7 @@ body {
 .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 .video-caption { margin-top: 12px; font-size: 15px; opacity: 0.8; text-align: center; }
 
+/* ===== الإحصائيات ===== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -111,6 +115,18 @@ body {
 .stat-card h3 { font-size: 32px; font-weight: 900; margin: 4px 0; }
 .stat-card p { opacity: 0.7; font-size: 14px; }
 
+/* ===== المحتوى الرئيسي (عمودين) ===== */
+.main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+    margin: 32px 0;
+}
+
+.left-column { min-width: 0; }
+.right-column { display: flex; flex-direction: column; gap: 24px; }
+
+/* ===== المسارات ===== */
 .tracks-container h2 { font-size: 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
 .tracks-grid {
     display: grid;
@@ -152,69 +168,80 @@ body {
 .track-card .start-btn { margin-top: 12px; padding: 8px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: var(--transition); position: relative; }
 .track-card .start-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
 
-/* ===== مشاريع وتحديات ===== */
-.projects-section, .challenges-section {
+/* ===== البطاقات الجانبية (الشحطات) ===== */
+.side-card {
     background: var(--card);
-    padding: 24px;
+    padding: 20px;
     border-radius: var(--radius);
-    margin: 32px 0;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
+    transition: var(--transition);
 }
 
-.projects-section h2, .challenges-section h2 {
-    font-size: 24px;
-    margin-bottom: 16px;
+.side-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 30px rgba(79, 70, 229, 0.1);
+}
+
+.side-card h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
     color: var(--primary);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
-.project-card, .challenge-card {
-    background: var(--bg);
-    padding: 16px;
-    border-radius: 12px;
-    margin: 12px 0;
-    border: 1px solid var(--border);
-    transition: var(--transition);
-}
-
-.project-card:hover, .challenge-card:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-}
-
-.project-card h3, .challenge-card h3 {
-    color: var(--primary);
-    margin-bottom: 8px;
-}
-
-.project-card p, .challenge-card p {
-    opacity: 0.8;
+.side-card .item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
     font-size: 14px;
-    line-height: 1.6;
 }
 
-.project-card .btn, .challenge-card .btn {
-    display: inline-block;
-    padding: 6px 16px;
+.side-card .item:last-child { border-bottom: none; }
+.side-card .item .title { font-weight: 600; }
+.side-card .item .meta { opacity: 0.7; font-size: 12px; }
+
+.project-item, .challenge-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.project-item:last-child, .challenge-item:last-child { border-bottom: none; }
+.project-item .btn, .challenge-item .btn {
+    padding: 4px 12px;
     background: var(--primary);
     color: white;
-    border-radius: 8px;
     border: none;
+    border-radius: 6px;
+    font-size: 12px;
     cursor: pointer;
-    font-weight: 600;
     transition: var(--transition);
-    margin: 4px;
 }
 
-.project-card .btn:hover, .challenge-card .btn:hover {
+.project-item .btn:hover, .challenge-item .btn:hover {
     background: var(--primary-dark);
     transform: scale(1.02);
 }
 
+/* ===== لوحة المتصدرين ===== */
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.leaderboard-item:last-child { border-bottom: none; }
+.leaderboard-item .medal { font-size: 22px; width: 40px; text-align: center; }
+.leaderboard-item .info { flex: 1; }
+.leaderboard-item .info .name { font-weight: 600; }
+.leaderboard-item .info .meta { font-size: 12px; opacity: 0.7; }
+.leaderboard-item .points { font-weight: 700; color: var(--primary); }
+
+/* ===== صفحة الدرس ===== */
 .lesson-panel {
     background: var(--card);
     border-radius: var(--radius);
@@ -298,6 +325,7 @@ body {
 .complete-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .complete-btn.completed { background: #22C55E; }
 
+/* ===== المودال ===== */
 .modal {
     display: none;
     position: fixed;
@@ -344,6 +372,7 @@ body {
 #profileInfo .danger { background: #EF4444; }
 #profileInfo .danger:hover { background: #DC2626; }
 
+/* ===== الإشعارات ===== */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -367,6 +396,12 @@ body {
     to { transform: translateX(0); opacity: 1; }
 }
 
+/* ===== استجابة ===== */
+@media (max-width: 992px) {
+    .main-content { grid-template-columns: 1fr; gap: 24px; }
+    .right-column { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+}
+
 @media (max-width: 768px) {
     body { padding: 0 12px; }
     .navbar { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
@@ -381,6 +416,7 @@ body {
     .modal-content { padding: 24px; }
     #profileInfo .profile-stats { grid-template-columns: 1fr 1fr; }
     .level-navigation { flex-direction: column; align-items: stretch; }
+    .right-column { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
