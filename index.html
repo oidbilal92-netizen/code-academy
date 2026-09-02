@@ -10,20 +10,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
 </head>
 <body>
+    <!-- ====== شريط علوي ====== -->
     <header class="navbar">
-        <div class="logo"><i class="fas fa-graduation-cap"></i> Learn<span>Pro</span></div>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Learn<span>Pro</span></span>
+        </div>
         <div class="nav-actions">
-            <button id="themeToggle"><i class="fas fa-moon"></i></button>
-            <button id="profileBtn"><i class="fas fa-user-circle"></i></button>
+            <!-- مكان شريط البحث (سيتم إضافته بواسطة search.js) -->
+            <div id="searchContainer" style="display:inline-block;margin-left:12px;"></div>
+            <button id="themeToggle" title="الوضع الليلي"><i class="fas fa-moon"></i></button>
+            <button id="profileBtn" title="الملف الشخصي"><i class="fas fa-user-circle"></i></button>
         </div>
     </header>
 
+    <!-- ====== لوحة التحكم ====== -->
     <section class="dashboard" id="dashboard">
         <div class="hero-section">
             <h1>👋 مرحباً بك في <span>LearnPro</span></h1>
             <p>تعلم البرمجة من الصفر إلى الاحتراف مع شرح عميق، وأمثلة عملية.</p>
         </div>
 
+        <!-- ====== فيديو تعريفي ====== -->
         <div class="intro-video">
             <h3><i class="fas fa-play-circle"></i> شرح عام عن لغات البرمجة</h3>
             <div class="video-wrapper">
@@ -55,19 +63,25 @@
                 <!-- الشحطة 1: مشاريع عملية -->
                 <section class="side-card" id="projectsSection">
                     <h3><i class="fas fa-project-diagram"></i> مشاريع عملية</h3>
-                    <div id="projectsContainer"></div>
+                    <div id="projectsContainer">
+                        <p style="opacity:0.7;font-size:14px;">المشاريع متاحة بعد تحميل projects.js</p>
+                    </div>
                 </section>
 
                 <!-- الشحطة 2: تحديات اليوم -->
                 <section class="side-card" id="challengesSection">
                     <h3><i class="fas fa-trophy"></i> تحديات اليوم</h3>
-                    <div id="challengesContainer"></div>
+                    <div id="challengesContainer">
+                        <p style="opacity:0.7;font-size:14px;">التحديات متاحة بعد تحميل challenges.js</p>
+                    </div>
                 </section>
 
                 <!-- الشحطة 3: لوحة المتصدرين -->
                 <section class="side-card" id="leaderboardSection">
                     <h3><i class="fas fa-crown"></i> لوحة المتصدرين</h3>
-                    <div id="leaderboardContainer"></div>
+                    <div id="leaderboardContainer">
+                        <p style="opacity:0.7;font-size:14px;">المتصدرين متاحين بعد تحميل leaderboard.js</p>
+                    </div>
                 </section>
             </div>
         </div>
@@ -134,21 +148,22 @@
         </div>
     </div>
 
+    <!-- ====== إشعارات ====== -->
     <div id="toast" class="toast"></div>
 
+    <!-- ====== السكربتات ====== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    
     <script src="data.js"></script>
     <script src="projects.js"></script>
     <script src="challenges.js"></script>
     <script src="leaderboard.js"></script>
     <script src="script.js"></script>
     <script src="search.js"></script>
-    <script src="fix.js"></script>
-    <script src="auto-fix.js"></script>
 </body>
 </html>
