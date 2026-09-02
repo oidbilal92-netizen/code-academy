@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>منصة التعلم النظري 💡</title>
+    <title>منصة التعلم الاحترافية 💡</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Prism.js لتمييز الكود -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 </head>
 <body>
     <!-- ====== شريط علوي ====== -->
@@ -14,20 +22,23 @@
         <div class="logo">
             <i class="fas fa-graduation-cap"></i>
             <span>Learn<span>Pro</span></span>
-            <span class="badge-version">v5.0</span>
         </div>
         <div class="nav-actions">
-            <button id="themeToggle"><i class="fas fa-moon"></i></button>
-            <button id="profileBtn"><i class="fas fa-user-circle"></i></button>
+            <button id="themeToggle" title="الوضع الليلي"><i class="fas fa-moon"></i></button>
+            <button id="profileBtn" title="الملف الشخصي"><i class="fas fa-user-circle"></i></button>
         </div>
     </header>
 
     <!-- ====== لوحة التحكم ====== -->
     <section class="dashboard" id="dashboard">
+        <div class="hero-section">
+            <h1>👋 مرحباً بك في <span>LearnPro</span></h1>
+            <p>تعلم البرمجة من الصفر إلى الاحتراف مع شرح عميق، فيديوهات، وأمثلة عملية.</p>
+        </div>
         <div class="stats-grid">
             <div class="stat-card"><i class="fas fa-language"></i><h3 id="totalTracks">0</h3><p>لغات</p></div>
             <div class="stat-card"><i class="fas fa-book"></i><h3 id="totalLessons">0</h3><p>دروس</p></div>
-            <div class="stat-card"><i class="fas fa-star"></i><h3 id="userScore">0</h3><p>نقاطك</p></div>
+            <div class="stat-card"><i class="fas fa-star"></i><h3 id="userScore">0</h3><p>نقاط</p></div>
             <div class="stat-card"><i class="fas fa-certificate"></i><h3 id="userBadges">0</h3><p>شهادات</p></div>
         </div>
         <div class="tracks-container">
@@ -44,9 +55,9 @@
             <span class="level-badge" id="levelBadge">مستوى 0</span>
         </div>
         <div class="lesson-body">
-            <!-- صورة الدرس -->
-            <div class="lesson-image" id="lessonImage">
-                <img id="lessonImg" src="" alt="صورة توضيحية" />
+            <!-- الفيديو -->
+            <div class="video-section" id="videoSection">
+                <iframe id="lessonVideo" src="" frameborder="0" allowfullscreen></iframe>
             </div>
 
             <!-- استخدامات اللغة -->
@@ -55,13 +66,16 @@
                 <div id="usesContent"></div>
             </div>
 
-            <!-- الشرح النظري -->
+            <!-- الشرح -->
             <div class="explanation" id="explanation"></div>
 
-            <!-- الكود التوضيحي -->
+            <!-- الكود التوضيحي مع تمييز النحو -->
             <div class="code-display">
-                <div class="code-header"><span><i class="fas fa-code"></i> كود توضيحي</span></div>
-                <pre id="codeExample"><code></code></pre>
+                <div class="code-header">
+                    <span><i class="fas fa-code"></i> كود توضيحي</span>
+                    <button id="copyCodeBtn"><i class="fas fa-copy"></i> نسخ</button>
+                </div>
+                <pre><code id="codeExample" class="language-python"></code></pre>
                 <div class="code-explanation" id="codeExplanation"></div>
             </div>
 
@@ -72,14 +86,19 @@
             </div>
 
             <!-- الاختبارات -->
-            <div class="quiz-section" id="quizSection">
+            <div class="quiz-section">
                 <h3><i class="fas fa-question-circle"></i> اختبارات الدرس</h3>
                 <div id="quizBody"></div>
                 <button id="submitQuizBtn" class="quiz-submit">تأكيد الإجابات</button>
                 <div id="quizResult"></div>
             </div>
 
-            <button id="completeLevelBtn" class="complete-btn"><i class="fas fa-award"></i> إنهاء المستوى</button>
+            <!-- أزرار التنقل -->
+            <div class="level-navigation">
+                <button id="prevLevelBtn" class="nav-btn"><i class="fas fa-chevron-right"></i> السابق</button>
+                <button id="completeLevelBtn" class="complete-btn"><i class="fas fa-award"></i> إنهاء الدرس</button>
+                <button id="nextLevelBtn" class="nav-btn">التالي <i class="fas fa-chevron-left"></i></button>
+            </div>
         </div>
     </section>
 
