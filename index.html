@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>منصة التعلم الاحترافية 💡</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="extra-styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -22,7 +21,7 @@
     <section class="dashboard" id="dashboard">
         <div class="hero-section">
             <h1>👋 مرحباً بك في <span>LearnPro</span></h1>
-            <p>تعلم البرمجة من الصفر إلى الاحتراف مع شرح عميق، فيديوهات، وأمثلة عملية.</p>
+            <p>تعلم البرمجة من الصفر إلى الاحتراف مع شرح عميق، وأمثلة عملية.</p>
         </div>
 
         <div class="intro-video">
@@ -53,16 +52,36 @@
             <span class="level-badge" id="levelBadge">مستوى 0</span>
         </div>
         <div class="lesson-body">
-            <div class="video-section"><iframe id="lessonVideo" src="" frameborder="0" allowfullscreen></iframe></div>
-            <div class="language-uses" id="languageUses"><h3><i class="fas fa-briefcase"></i> استخدامات اللغة</h3><div id="usesContent"></div></div>
+            <!-- تم إزالة الفيديو نهائياً -->
+
+            <div class="language-uses" id="languageUses">
+                <h3><i class="fas fa-briefcase"></i> استخدامات اللغة</h3>
+                <div id="usesContent"></div>
+            </div>
+
             <div class="explanation" id="explanation"></div>
+
             <div class="code-display">
-                <div class="code-header"><span><i class="fas fa-code"></i> كود توضيحي</span><button id="copyCodeBtn"><i class="fas fa-copy"></i> نسخ</button></div>
+                <div class="code-header">
+                    <span><i class="fas fa-code"></i> كود توضيحي</span>
+                    <button id="copyCodeBtn"><i class="fas fa-copy"></i> نسخ</button>
+                </div>
                 <pre><code id="codeExample" class="language-python"></code></pre>
                 <div class="code-explanation" id="codeExplanation"></div>
             </div>
-            <div class="summary-box" id="summaryBox"><h3><i class="fas fa-list-check"></i> ملخص الدرس</h3><ul id="summaryList"></ul></div>
-            <div class="quiz-section"><h3><i class="fas fa-question-circle"></i> اختبارات الدرس</h3><div id="quizBody"></div><button id="submitQuizBtn" class="quiz-submit">تأكيد الإجابات</button><div id="quizResult"></div></div>
+
+            <div class="summary-box" id="summaryBox">
+                <h3><i class="fas fa-list-check"></i> ملخص الدرس</h3>
+                <ul id="summaryList"></ul>
+            </div>
+
+            <div class="quiz-section">
+                <h3><i class="fas fa-question-circle"></i> اختبارات الدرس</h3>
+                <div id="quizBody"></div>
+                <button id="submitQuizBtn" class="quiz-submit">تأكيد الإجابات</button>
+                <div id="quizResult"></div>
+            </div>
+
             <div class="level-navigation">
                 <button id="prevLevelBtn" class="nav-btn"><i class="fas fa-chevron-right"></i> السابق</button>
                 <button id="completeLevelBtn" class="complete-btn"><i class="fas fa-award"></i> إنهاء الدرس</button>
@@ -96,7 +115,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
     <script src="data.js"></script>
-    <script src="details.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
