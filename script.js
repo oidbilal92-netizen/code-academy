@@ -61,7 +61,7 @@ function openTrack(trackIdx) {
     renderLevel(trackIdx, 0);
 }
 
-// ===== عرض مستوى (بدون فيديو) =====
+// ===== عرض مستوى =====
 function renderLevel(trackIdx, levelIdx) {
     const track = APP_DATA.tracks[trackIdx];
     const lvl = track.levels[levelIdx];
@@ -70,12 +70,6 @@ function renderLevel(trackIdx, levelIdx) {
 
     document.getElementById('lessonTitle').textContent = `${track.name} - ${lvl.title}`;
     document.getElementById('levelBadge').textContent = `مستوى ${lvl.id + 1}`;
-
-    // ✅ إخفاء الفيديو نهائياً
-    const videoSection = document.getElementById('videoSection');
-    if (videoSection) {
-        videoSection.style.display = 'none';
-    }
 
     const usesContent = document.getElementById('usesContent');
     usesContent.innerHTML = `
@@ -155,6 +149,79 @@ function renderLevel(trackIdx, levelIdx) {
         btn.innerHTML = '<i class="fas fa-award"></i> إنهاء الدرس';
         btn.className = 'complete-btn';
     }
+}
+
+// ===== عرض المشاريع =====
+function renderProjects() {
+    const container = document.getElementById('projectsContainer');
+    if (!container) return;
+    let html = '';
+    for (const [lang, projects] of Object.entries(PROJECTS)) {
+        html += `<h3 style="margin-top:16px;color:var(--primary);">${lang.toUpperCase()}</h3>`;
+        for (const [level, project] of Object.entries(projects)) {
+            html += `
+                <div class="project-card">
+                    <h3>${project.name}</h3>
+                    <p>${project.description}</p>
+                    <p><strong>المستوى:</strong> ${level}</p>
+                    <button class="btn" onclick="showProjectDetails('${lang}', '${level}')">عرض المشروع</button>
+                </div>
+            `;
+        }
+    }
+    container.innerHTML = html || '<p>لا توجد مشاريع متاحة حالياً.</p>';
+}
+
+// ===== عرض التحديات =====
+function renderChallenges() {
+    const container = document.getElementById('challengesContainer');
+    if (!container) return;
+    const today = CHALLENGES.today;
+    if (!today) {
+        container.innerHTML = '<p>لا توجد تحديات اليوم.</p>';
+        return;
+    }
+    const html = `
+        <div class="challenge-card">
+            <h3>📅 ${today.title}</h3>
+            <p>${today.description}</p>
+            <p><strong>المستوى:</strong> ${today.level}</p>
+            <p><strong>اللغة:</strong> ${today.language}</p>
+            <p><strong>النقاط:</strong> ⭐ ${today.points}</p>
+            <button class="btn" onclick="showChallengeHint()">💡 تلميح</button>
+            <button class="btn" onclick="showChallengeSolution()">✅ عرض الحل</button>
+        </div>
+    `;
+    container.innerHTML = html;
+}
+
+// ===== عرض تفاصيل المشروع =====
+function showProjectDetails(lang, level) {
+    const project = PROJECTS[lang] && PROJECTS[lang][level];
+    if (!project) {
+        alert('⚠️ المشروع غير موجود.');
+        return;
+    }
+    alert(`
+📚 ${project.name}
+📝 ${project.description}
+📋 الخطوات:
+${project.steps.map((s, i) => `${i+1}. ${s}`).join('\n')}
+💻 الكود:
+${project.code || 'الكود متاح في ملف المشروع.'}
+    `);
+}
+
+// ===== عرض تلميح التحدي =====
+function showChallengeHint() {
+    const hint = CHALLENGES.today.hint;
+    alert(`💡 تلميح: ${hint || 'لا يوجد تلميح لهذا التحدي.'}`);
+}
+
+// ===== عرض حل التحدي =====
+function showChallengeSolution() {
+    const solution = CHALLENGES.today.solution;
+    alert(`✅ الحل:\n${solution || 'لا يوجد حل لهذا التحدي.'}`);
 }
 
 // ===== التنقل بين المستويات =====
@@ -265,6 +332,8 @@ function resetProgress() {
 // ===== الأحداث =====
 document.addEventListener('DOMContentLoaded', function() {
     renderTracks();
+    renderProjects();
+    renderChallenges();
 
     document.getElementById('backBtn').addEventListener('click', goBack);
     document.getElementById('prevLevelBtn').addEventListener('click', () => navigateLevel(-1));
@@ -299,5 +368,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     saveProgress();
-    console.log('🚀 المنصة جاهزة بدون فيديوهات!');
+    console.log('🚀 المنصة جاهزة مع المشاريع والتحديات!');
 });
