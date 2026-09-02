@@ -122,7 +122,6 @@ function renderLevel(trackIdx, levelIdx) {
     const quizBody = document.getElementById('quizBody');
     let quizHTML = '';
 
-    // أسئلة اختيار من متعدد
     if (quiz.multiple && quiz.multiple.length > 0) {
         quizHTML += `<h4>اختيار من متعدد</h4>`;
         quiz.multiple.forEach((q, idx) => {
@@ -137,7 +136,6 @@ function renderLevel(trackIdx, levelIdx) {
         });
     }
 
-    // أسئلة صح/خطأ
     if (quiz.truefalse && quiz.truefalse.length > 0) {
         quizHTML += `<h4>صح / خطأ</h4>`;
         quiz.truefalse.forEach((q, idx) => {
@@ -150,14 +148,12 @@ function renderLevel(trackIdx, levelIdx) {
         });
     }
 
-    // أسئلة وصل
     if (quiz.matching && quiz.matching.length > 0) {
         quizHTML += `<h4>وصل</h4>`;
         quiz.matching.forEach((q, idx) => {
             quizHTML += `<p class="quiz-question">${q.question}</p>`;
-            const shuffled = [...q.pairs].sort(() => Math.random() - 0.5);
             const left = q.pairs.map(p => p[0]);
-            const right = shuffled.map(p => p[1]);
+            const right = q.pairs.map(p => p[1]);
             quizHTML += `
                 <div style="display:flex;gap:20px;flex-wrap:wrap;margin:10px 0;">
                     <div style="flex:1;">
@@ -171,7 +167,6 @@ function renderLevel(trackIdx, levelIdx) {
         });
     }
 
-    // أسئلة ترتيب
     if (quiz.ordering && quiz.ordering.length > 0) {
         quizHTML += `<h4>ترتيب</h4>`;
         quiz.ordering.forEach((q, idx) => {
@@ -210,7 +205,6 @@ function submitQuiz() {
     let correctCount = 0;
     let totalQuestions = 0;
 
-    // اختيار من متعدد
     const multipleRadios = document.querySelectorAll('input[type="radio"][name^="q"]');
     multipleRadios.forEach(radio => {
         if (radio.checked) {
@@ -223,7 +217,6 @@ function submitQuiz() {
         }
     });
 
-    // صح/خطأ
     const tfRadios = document.querySelectorAll('input[type="radio"][name^="tf_"]');
     const tfGroups = {};
     tfRadios.forEach(radio => {
@@ -242,15 +235,6 @@ function submitQuiz() {
         }
     });
 
-    // وصل - تقييم بسيط (نقاط إضافية)
-    const matchingItems = document.querySelectorAll('.matching-item');
-    // يمكن إضافة منطق أكثر تعقيداً هنا
-
-    // ترتيب - تقييم بسيط
-    const orderingItems = document.querySelectorAll('.ordering-item');
-    // يمكن إضافة منطق أكثر تعقيداً هنا
-
-    // عرض النتيجة
     const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
     if (percentage >= 70) {
         const bonus = Math.min(10, Math.floor(percentage / 10));
