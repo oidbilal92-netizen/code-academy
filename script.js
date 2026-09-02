@@ -1,91 +1,12 @@
-// ============================================================
-// منصة الاحتراف البرمجي - النسخة الاحترافية المطلقة
-// تعمل بتقنية Pyodide (WebAssembly) - بدون أي API خارجي
-// ============================================================
-
 // ===== المتغيرات العامة =====
 let currentTrack = null;
 let currentLevelIndex = 0;
 let score = parseInt(localStorage.getItem('proScore')) || 0;
 let completed = JSON.parse(localStorage.getItem('proCompleted')) || {};
 let userBadges = parseInt(localStorage.getItem('proBadges')) || 0;
-let streak = parseInt(localStorage.getItem('proStreak')) || 0;
-let lastVisit = localStorage.getItem('proLastVisit') || '';
 let lang = 'ar';
-let pyodide = null;
-let isPyodideLoading = false;
 
-// ===== حساب أيام التعلم =====
-function updateStreak() {
-    const today = new Date().toDateString();
-    if (lastVisit !== today) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        if (lastVisit === yesterday.toDateString()) {
-            streak += 1;
-        } else {
-            streak = 1;
-        }
-        lastVisit = today;
-        localStorage.setItem('proStreak', streak);
-        localStorage.setItem('proLastVisit', lastVisit);
-    }
-    document.getElementById('userStreak').textContent = streak;
-    document.getElementById('profileStreak').textContent = streak;
-}
-
-// ===== تحميل Pyodide =====
-async function initPyodide() {
-    if (pyodide) return pyodide;
-    if (isPyodideLoading) {
-        return new Promise((resolve) => {
-            const check = setInterval(() => {
-                if (pyodide) {
-                    clearInterval(check);
-                    resolve(pyodide);
-                }
-            }, 100);
-        });
-    }
-    isPyodideLoading = true;
-    const output = document.getElementById('outputContent');
-    output.textContent = '⏳ جاري تحميل محرك Python عالي الأداء...';
-    
-    try {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js';
-        document.head.appendChild(script);
-        
-        await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
-        });
-        
-        pyodide = await loadPyodide({
-            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/'
-        });
-        
-        pyodide.runPython(`
-import sys
-import io
-import traceback
-sys.stdout = io.StringIO()
-sys.stderr = io.StringIO()
-        `);
-        
-        isPyodideLoading = false;
-        output.textContent = '✅ محرك Python جاهز! قم بتشغيل الكود.';
-        showToast('🚀 تم تحميل محرك Python بنجاح');
-        return pyodide;
-    } catch (e) {
-        isPyodideLoading = false;
-        output.textContent = '❌ فشل تحميل محرك Python: ' + e.message;
-        showToast('❌ فشل تحميل المحرك', true);
-        throw e;
-    }
-}
-
-// ===== الإشعارات الاحترافية =====
+// ===== الإشعارات =====
 function showToast(msg, isError = false) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -126,11 +47,10 @@ function renderTracks() {
         `;
     }).join('');
     document.getElementById('totalTracks').textContent = APP_DATA.tracks.length;
-    const totalLevels = APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0);
-    document.getElementById('totalLevels').textContent = totalLevels;
+    const totalLessons = APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0);
+    document.getElementById('totalLessons').textContent = totalLessons;
     document.getElementById('userScore').textContent = score;
     document.getElementById('userBadges').textContent = userBadges;
-    updateStreak();
     document.querySelectorAll('.track-card').forEach(el => {
         el.addEventListener('click', () => {
             const idx = parseInt(el.dataset.track);
@@ -146,39 +66,131 @@ function openTrack(trackIdx) {
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('lessonPanel').style.display = 'block';
     renderLevel(trackIdx, 0);
-    if (currentTrack.id === 'python') {
-        initPyodide().catch(() => {});
-    }
 }
 
 // ===== عرض مستوى =====
 function renderLevel(trackIdx, levelIdx) {
     const track = APP_DATA.tracks[trackIdx];
     const lvl = track.levels[levelIdx];
+    const uses = track.uses;
     currentLevelIndex = levelIdx;
+
+    // العنوان
     document.getElementById('lessonTitle').textContent = `${track.name} - ${lvl.title}`;
     document.getElementById('levelBadge').textContent = `مستوى ${lvl.id + 1}`;
-    document.getElementById('explanation').innerHTML = lvl.content;
-    document.getElementById('codeEditor').value = lvl.code;
-    document.getElementById('outputContent').textContent = '💡 قم بتشغيل الكود لترى النتيجة';
-    document.getElementById('expectedOutput').textContent = lvl.expected || '(غير محددة)';
-    
+
+    // الصورة
+    const img = document.getElementById('lessonImg');
+    img.src = lvl.image || 'https://via.placeholder.com/600x300/2563eb/ffffff?text=درس+تعليمي';
+    img.alt = lvl.title;
+
+    // استخدامات اللغة
+    const usesContent = document.getElementById('usesContent');
+    usesContent.innerHTML = `
+        <p><strong>${uses.overview}</strong></p>
+        <ul>
+            ${uses.fields.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('')}
+        </ul>
+        <p style="margin-top:12px;"><strong>شركات تستخدم هذه اللغة:</strong> ${uses.companies.join(' - ')}</p>
+    `;
+
+    // الشرح
+    const content = lvl.content;
+    document.getElementById('explanation').innerHTML = `
+        <h3>📖 مقدمة</h3>
+        <p>${content.intro}</p>
+        <h3>📘 شرح متعمق</h3>
+        <p>${content.explanation}</p>
+        <h3>🌍 استخدامات في الواقع</h3>
+        <p>${content.realLife}</p>
+        <h3>💡 لماذا هذا مهم؟</h3>
+        <p>${content.whyImportant}</p>
+    `;
+
+    // الكود التوضيحي
+    document.querySelector('#codeExample code').textContent = content.codeExample;
+    document.getElementById('codeExplanation').innerHTML = `
+        <strong>📝 شرح الكود:</strong> ${content.codeExplanation}
+    `;
+
+    // الملخص
+    const summaryList = document.getElementById('summaryList');
+    summaryList.innerHTML = content.summary.map(s => `<li>${s}</li>`).join('');
+
+    // الاختبارات
     const quiz = lvl.quiz;
     const quizBody = document.getElementById('quizBody');
-    if (quiz) {
-        quizBody.innerHTML = `
-            <p class="quiz-question"><strong>${quiz.question}</strong></p>
-            ${quiz.options.map((opt, i) => `
-                <label class="quiz-option">
-                    <input type="radio" name="quizAns" value="${i}" />
-                    <span>${opt}</span>
-                </label>
-            `).join('')}
-        `;
-    } else {
-        quizBody.innerHTML = '<p class="text-muted">لا يوجد اختبار لهذا المستوى.</p>';
+    let quizHTML = '';
+
+    // أسئلة اختيار من متعدد
+    if (quiz.multiple && quiz.multiple.length > 0) {
+        quizHTML += `<h4>اختيار من متعدد</h4>`;
+        quiz.multiple.forEach((q, idx) => {
+            quizHTML += `
+                <p class="quiz-question">${idx+1}. ${q.question}</p>
+                ${q.options.map((opt, i) => `
+                    <label class="quiz-option">
+                        <input type="radio" name="q${idx}" value="${i}" /> ${opt}
+                    </label>
+                `).join('')}
+            `;
+        });
     }
+
+    // أسئلة صح/خطأ
+    if (quiz.truefalse && quiz.truefalse.length > 0) {
+        quizHTML += `<h4>صح / خطأ</h4>`;
+        quiz.truefalse.forEach((q, idx) => {
+            const id = `tf_${idx}`;
+            quizHTML += `
+                <p class="quiz-question">${idx+1}. ${q.question}</p>
+                <label class="quiz-option"><input type="radio" name="${id}" value="true" /> صح</label>
+                <label class="quiz-option"><input type="radio" name="${id}" value="false" /> خطأ</label>
+            `;
+        });
+    }
+
+    // أسئلة وصل
+    if (quiz.matching && quiz.matching.length > 0) {
+        quizHTML += `<h4>وصل</h4>`;
+        quiz.matching.forEach((q, idx) => {
+            quizHTML += `<p class="quiz-question">${q.question}</p>`;
+            const shuffled = [...q.pairs].sort(() => Math.random() - 0.5);
+            const left = q.pairs.map(p => p[0]);
+            const right = shuffled.map(p => p[1]);
+            quizHTML += `
+                <div style="display:flex;gap:20px;flex-wrap:wrap;margin:10px 0;">
+                    <div style="flex:1;">
+                        ${left.map((item, i) => `<div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:4px 0;">${item}</div>`).join('')}
+                    </div>
+                    <div style="flex:1;">
+                        ${right.map((item, i) => `<div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:4px 0;">${item}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // أسئلة ترتيب
+    if (quiz.ordering && quiz.ordering.length > 0) {
+        quizHTML += `<h4>ترتيب</h4>`;
+        quiz.ordering.forEach((q, idx) => {
+            quizHTML += `
+                <p class="quiz-question">${q.question}</p>
+                ${q.steps.map((step, i) => `
+                    <div style="display:flex;align-items:center;gap:10px;margin:6px 0;">
+                        <span style="background:var(--primary);color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;">${i+1}</span>
+                        <span>${step}</span>
+                    </div>
+                `).join('')}
+            `;
+        });
+    }
+
+    quizBody.innerHTML = quizHTML || '<p>لا يوجد اختبارات لهذا الدرس.</p>';
     document.getElementById('quizResult').innerHTML = '';
+
+    // زر الإكمال
     const key = track.id + '-' + lvl.id;
     const btn = document.getElementById('completeLevelBtn');
     if (completed[key]) {
@@ -187,141 +199,69 @@ function renderLevel(trackIdx, levelIdx) {
         btn.className = 'complete-btn completed';
     } else {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-award"></i> إنهاء المستوى';
+        btn.innerHTML = '<i class="fas fa-award"></i> إنهاء الدرس';
         btn.className = 'complete-btn';
-    }
-}
-
-// ===== تشغيل الكود الاحترافي مع مقارنة المخرجات =====
-async function runCode() {
-    const code = document.getElementById('codeEditor').value;
-    const output = document.getElementById('outputContent');
-    const expected = document.getElementById('expectedOutput').textContent || '';
-    
-    if (currentTrack && currentTrack.id === 'python') {
-        try {
-            if (!pyodide) {
-                output.textContent = '⏳ جاري تحميل محرك Python...';
-                await initPyodide();
-            }
-            
-            pyodide.runPython(`
-sys.stdout = io.StringIO()
-sys.stderr = io.StringIO()
-            `);
-            
-            try {
-                pyodide.runPython(code);
-            } catch (e) {
-                try {
-                    pyodide.runPython(`
-exec('''${code.replace(/'/g, "\\'")}''')
-                    `);
-                } catch (e2) {
-                    throw e2;
-                }
-            }
-            
-            const result = pyodide.runPython('sys.stdout.getvalue()');
-            const error = pyodide.runPython('sys.stderr.getvalue()');
-            
-            let finalOutput = '';
-            if (error) {
-                finalOutput = '❌ خطأ:\n' + error;
-            } else if (result) {
-                finalOutput = result;
-            } else {
-                finalOutput = '✅ تم التنفيذ بنجاح (لا يوجد مخرجات)';
-            }
-            
-            // مقارنة المخرجات مع المتوقع
-            if (expected && expected !== '(غير محددة)') {
-                const isMatch = finalOutput.trim() === expected.trim();
-                if (!isMatch) {
-                    finalOutput += `\n\n⚠️ المخرجات لا تطابق المتوقع!\n🔮 المتوقع: ${expected}`;
-                } else {
-                    finalOutput += `\n\n✅ المخرجات تطابق المتوقع!`;
-                }
-            }
-            
-            output.textContent = finalOutput;
-            
-        } catch (e) {
-            output.textContent = '❌ خطأ في التنفيذ:\n' + e.message;
-        }
-        return;
-    }
-    
-    const langMap = {
-        'javascript': 'nodejs',
-        'cpp': 'cpp',
-        'java': 'java',
-        'csharp': 'csharp',
-        'php': 'php',
-        'swift': 'swift',
-        'kotlin': 'kotlin',
-        'go': 'go',
-        'rust': 'rust'
-    };
-    const langId = currentTrack ? (langMap[currentTrack.id] || 'python3') : 'python3';
-    
-    output.textContent = '⏳ جاري التنفيذ عبر JDoodle...';
-    
-    try {
-        const res = await fetch('https://api.jdoodle.com/v1/execute', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                script: code,
-                language: langId,
-                versionIndex: '0'
-            })
-        });
-        const data = await res.json();
-        let finalOutput = '';
-        if (data.output) {
-            finalOutput = data.output.trim() || '(لا يوجد مخرجات)';
-        } else if (data.error) {
-            finalOutput = '❌ خطأ: ' + data.error;
-        } else {
-            finalOutput = '❌ خطأ غير معروف';
-        }
-        
-        // مقارنة المخرجات مع المتوقع
-        if (expected && expected !== '(غير محددة)') {
-            const isMatch = finalOutput.trim() === expected.trim();
-            if (!isMatch) {
-                finalOutput += `\n\n⚠️ المخرجات لا تطابق المتوقع!\n🔮 المتوقع: ${expected}`;
-            } else {
-                finalOutput += `\n\n✅ المخرجات تطابق المتوقع!`;
-            }
-        }
-        
-        output.textContent = finalOutput;
-        
-    } catch (e) {
-        const expectedFallback = expected || '(لا توجد مخرجات متوقعة)';
-        output.textContent = `⚠️ تعذر الاتصال بالخادم.\n🔮 المخرجات المتوقعة:\n${expectedFallback}`;
     }
 }
 
 // ===== اختبار =====
 function submitQuiz() {
-    const selected = document.querySelector('input[name="quizAns"]:checked');
     const resultDiv = document.getElementById('quizResult');
-    if (!selected) {
-        resultDiv.innerHTML = '<span class="text-danger">⚠️ يرجى اختيار إجابة</span>';
-        return;
-    }
-    const ans = parseInt(selected.value);
-    const quiz = currentTrack.levels[currentLevelIndex].quiz;
-    if (ans === quiz.correct) {
-        resultDiv.innerHTML = '<span class="text-success">✅ إجابة صحيحة! +5 نقاط</span>';
-        score += 5;
+    let correctCount = 0;
+    let totalQuestions = 0;
+
+    // اختيار من متعدد
+    const multipleRadios = document.querySelectorAll('input[type="radio"][name^="q"]');
+    multipleRadios.forEach(radio => {
+        if (radio.checked) {
+            totalQuestions++;
+            const idx = parseInt(radio.name.replace('q', ''));
+            const quiz = currentTrack.levels[currentLevelIndex].quiz;
+            if (quiz.multiple && quiz.multiple[idx] && parseInt(radio.value) === quiz.multiple[idx].correct) {
+                correctCount++;
+            }
+        }
+    });
+
+    // صح/خطأ
+    const tfRadios = document.querySelectorAll('input[type="radio"][name^="tf_"]');
+    const tfGroups = {};
+    tfRadios.forEach(radio => {
+        if (radio.checked) {
+            if (!tfGroups[radio.name]) tfGroups[radio.name] = [];
+            tfGroups[radio.name].push(radio.value);
+        }
+    });
+    Object.keys(tfGroups).forEach((name, idx) => {
+        if (tfGroups[name].length === 1) {
+            totalQuestions++;
+            const quiz = currentTrack.levels[currentLevelIndex].quiz;
+            if (quiz.truefalse && quiz.truefalse[idx] && tfGroups[name][0] === String(quiz.truefalse[idx].correct)) {
+                correctCount++;
+            }
+        }
+    });
+
+    // وصل - تقييم بسيط (نقاط إضافية)
+    const matchingItems = document.querySelectorAll('.matching-item');
+    // يمكن إضافة منطق أكثر تعقيداً هنا
+
+    // ترتيب - تقييم بسيط
+    const orderingItems = document.querySelectorAll('.ordering-item');
+    // يمكن إضافة منطق أكثر تعقيداً هنا
+
+    // عرض النتيجة
+    const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+    if (percentage >= 70) {
+        const bonus = Math.min(10, Math.floor(percentage / 10));
+        score += bonus;
         saveProgress();
-        showToast('🌟 إجابة صحيحة! +5 نقاط');
+        resultDiv.innerHTML = `<span class="text-success">✅ نتيجة ممتازة! ${percentage}% (+${bonus} نقاط)</span>`;
+        showToast(`🌟 نتيجة ممتازة! +${bonus} نقاط`);
+    } else if (percentage >= 40) {
+        resultDiv.innerHTML = `<span class="text-warning">⚠️ نتيجة جيدة: ${percentage}% (حاول مرة أخرى للحصول على نقاط إضافية)</span>`;
     } else {
-        resultDiv.innerHTML = `<span class="text-danger">❌ إجابة خاطئة. الصحيح: ${quiz.options[quiz.correct]}</span>`;
+        resultDiv.innerHTML = `<span class="text-danger">❌ نتيجة: ${percentage}% (راجع الدرس وحاول مرة أخرى)</span>`;
     }
 }
 
@@ -331,14 +271,14 @@ function completeLevel() {
     const lvl = track.levels[currentLevelIndex];
     const key = track.id + '-' + lvl.id;
     if (completed[key]) {
-        showToast('✅ هذا المستوى مكتمل بالفعل', true);
+        showToast('✅ هذا الدرس مكتمل بالفعل', true);
         return;
     }
     completed[key] = true;
-    score += 15;
+    score += 20;
     userBadges += 1;
     saveProgress();
-    showToast(`🏆 تم إكمال "${lvl.title}"! +15 نقاط`);
+    showToast(`🏆 تم إكمال "${lvl.title}"! +20 نقاط`);
     const btn = document.getElementById('completeLevelBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-check-circle"></i> مكتمل ✅';
@@ -356,9 +296,8 @@ function goBack() {
 // ===== الملف الشخصي =====
 function openProfile() {
     document.getElementById('profileScore').textContent = score;
-    document.getElementById('profileLevels').textContent = Object.keys(completed).length;
+    document.getElementById('profileLessons').textContent = Object.keys(completed).length;
     document.getElementById('profileCertificates').textContent = userBadges;
-    document.getElementById('profileStreak').textContent = streak;
     document.getElementById('profileModal').style.display = 'flex';
 }
 
@@ -368,9 +307,8 @@ function exportProgress() {
         score,
         completed,
         badges: userBadges,
-        streak,
         exportDate: new Date().toISOString(),
-        totalLevels: APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0)
+        totalLessons: APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0)
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -385,12 +323,9 @@ function resetProgress() {
         localStorage.removeItem('proScore');
         localStorage.removeItem('proCompleted');
         localStorage.removeItem('proBadges');
-        localStorage.removeItem('proStreak');
-        localStorage.removeItem('proLastVisit');
         score = 0;
         completed = {};
         userBadges = 0;
-        streak = 0;
         saveProgress();
         renderTracks();
         showToast('🔄 تم إعادة تعيين التقدم');
@@ -401,27 +336,7 @@ function resetProgress() {
 // ===== الأحداث =====
 document.addEventListener('DOMContentLoaded', () => {
     renderTracks();
-    
-    setTimeout(() => {
-        initPyodide().catch(() => {});
-    }, 1000);
-    
-    document.getElementById('runCodeBtn').addEventListener('click', runCode);
-    document.getElementById('resetCodeBtn').addEventListener('click', () => {
-        if (currentTrack) {
-            document.getElementById('codeEditor').value = currentTrack.levels[currentLevelIndex].code;
-            document.getElementById('outputContent').textContent = '💡 قم بتشغيل الكود لترى النتيجة';
-            document.getElementById('expectedOutput').textContent = currentTrack.levels[currentLevelIndex].expected || '(غير محددة)';
-        }
-    });
-    document.getElementById('copyCodeBtn').addEventListener('click', () => {
-        const code = document.getElementById('codeEditor').value;
-        navigator.clipboard.writeText(code).then(() => {
-            showToast('📋 تم نسخ الكود إلى الحافظة');
-        }).catch(() => {
-            showToast('❌ فشل النسخ', true);
-        });
-    });
+
     document.getElementById('submitQuizBtn').addEventListener('click', submitQuiz);
     document.getElementById('completeLevelBtn').addEventListener('click', completeLevel);
     document.getElementById('backBtn').addEventListener('click', goBack);
@@ -438,33 +353,17 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.classList.toggle('fa-sun');
         localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
-    document.getElementById('langToggle').addEventListener('click', () => {
-        lang = lang === 'ar' ? 'en' : 'ar';
-        document.getElementById('langToggle').textContent = lang === 'ar' ? 'EN' : 'عربي';
-        showToast(lang === 'ar' ? '🔁 تم التبديل إلى العربية' : '🔁 Switched to English');
-    });
     document.getElementById('profileModal').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) {
             document.getElementById('profileModal').style.display = 'none';
         }
     });
-    
+
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark');
         document.querySelector('#themeToggle i').className = 'fas fa-sun';
     }
-    
-    saveProgress();
-    console.log('🚀 المنصة الاحترافية المطلقة جاهزة!');
-});
 
-// ===== اختصارات لوحة المفاتيح =====
-document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        runCode();
-    }
-    if (e.key === 'Escape') {
-        document.getElementById('profileModal').style.display = 'none';
-    }
+    saveProgress();
+    console.log('🚀 المنصة النظرية المتكاملة جاهزة!');
 });
