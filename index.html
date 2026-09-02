@@ -7,14 +7,7 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet" />
-    <!-- Prism.js لتمييز الكود -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 </head>
 <body>
     <!-- ====== شريط علوي ====== -->
@@ -35,12 +28,29 @@
             <h1>👋 مرحباً بك في <span>LearnPro</span></h1>
             <p>تعلم البرمجة من الصفر إلى الاحتراف مع شرح عميق، فيديوهات، وأمثلة عملية.</p>
         </div>
+
+        <!-- ====== الفيديو العام عن لغات البرمجة ====== -->
+        <div class="intro-video">
+            <h3><i class="fas fa-play-circle"></i> شرح عام عن لغات البرمجة</h3>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/LtXPYIpr_UE" 
+                        title="شرح لغات البرمجة" 
+                        frameborder="0" 
+                        allowfullscreen>
+                </iframe>
+            </div>
+            <p class="video-caption">🎯 شاهد هذا الفيديو لفهم الفرق بين لغات البرمجة ومتى تستخدم كل واحدة</p>
+        </div>
+
+        <!-- ====== الإحصائيات ====== -->
         <div class="stats-grid">
             <div class="stat-card"><i class="fas fa-language"></i><h3 id="totalTracks">0</h3><p>لغات</p></div>
             <div class="stat-card"><i class="fas fa-book"></i><h3 id="totalLessons">0</h3><p>دروس</p></div>
             <div class="stat-card"><i class="fas fa-star"></i><h3 id="userScore">0</h3><p>نقاط</p></div>
             <div class="stat-card"><i class="fas fa-certificate"></i><h3 id="userBadges">0</h3><p>شهادات</p></div>
         </div>
+
+        <!-- ====== قائمة اللغات ====== -->
         <div class="tracks-container">
             <h2><i class="fas fa-route"></i> اختر مسارك التعليمي</h2>
             <div class="tracks-grid" id="trackGrid"></div>
@@ -122,6 +132,12 @@
     <!-- ====== إشعارات ====== -->
     <div id="toast" class="toast"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
