@@ -23,9 +23,21 @@ function saveProgress() {
     document.getElementById('userBadges').textContent = userBadges;
 }
 
-// ===== عرض اللغات =====
+// ===== عرض اللغات (المسارات) =====
 function renderTracks() {
+    console.log('🔄 جاري عرض المسارات...');
     const grid = document.getElementById('trackGrid');
+    if (!grid) {
+        console.error('❌ عنصر trackGrid غير موجود');
+        return;
+    }
+    
+    if (!APP_DATA || !APP_DATA.tracks) {
+        console.error('❌ البيانات غير موجودة');
+        grid.innerHTML = '<p style="color:red;">⚠️ لم يتم تحميل البيانات. تأكد من وجود ملف data.js</p>';
+        return;
+    }
+
     grid.innerHTML = APP_DATA.tracks.map((t, idx) => {
         const done = Object.keys(completed).filter(k => k.startsWith(t.id)).length;
         const total = t.levels.length;
@@ -40,11 +52,13 @@ function renderTracks() {
             </div>
         `;
     }).join('');
+
     document.getElementById('totalTracks').textContent = APP_DATA.tracks.length;
     const totalLessons = APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0);
     document.getElementById('totalLessons').textContent = totalLessons;
     document.getElementById('userScore').textContent = score;
     document.getElementById('userBadges').textContent = userBadges;
+    console.log('✅ تم عرض المسارات بنجاح');
 }
 
 // ===== فتح مسار =====
@@ -56,7 +70,7 @@ function openTrack(trackIdx) {
     renderLevel(trackIdx, 0);
 }
 
-// ===== عرض مستوى مع الشرح الطويل =====
+// ===== عرض مستوى =====
 function renderLevel(trackIdx, levelIdx) {
     const track = APP_DATA.tracks[trackIdx];
     const lvl = track.levels[levelIdx];
@@ -68,7 +82,6 @@ function renderLevel(trackIdx, levelIdx) {
 
     document.getElementById('lessonVideo').src = lvl.video || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
 
-    // استخدامات اللغة
     const usesContent = document.getElementById('usesContent');
     usesContent.innerHTML = `
         <p><strong>${uses.overview}</strong></p>
@@ -76,7 +89,6 @@ function renderLevel(trackIdx, levelIdx) {
         <p><strong>شركات:</strong> ${uses.companies.join(' - ')}</p>
     `;
 
-    // عرض الشرح الطويل من data.js
     const content = lvl.content;
     const explanationDiv = document.getElementById('explanation');
     explanationDiv.innerHTML = content.fullExplanation
@@ -96,7 +108,6 @@ function renderLevel(trackIdx, levelIdx) {
         })
         .join('');
 
-    // الكود
     const codeElement = document.getElementById('codeExample');
     const langMap = { 'python': 'python', 'javascript': 'javascript', 'java': 'java', 'cpp': 'cpp', 'csharp': 'csharp' };
     const langId = langMap[track.id] || 'python';
@@ -108,11 +119,9 @@ function renderLevel(trackIdx, levelIdx) {
 
     document.getElementById('codeExplanation').innerHTML = `<strong>📝 شرح الكود:</strong> ${content.codeExplanation}`;
 
-    // الملخص
     const summaryList = document.getElementById('summaryList');
     summaryList.innerHTML = content.summary.map(s => `<li>${s}</li>`).join('');
 
-    // الاختبارات
     const quiz = lvl.quiz;
     const quizBody = document.getElementById('quizBody');
     let quizHTML = '';
@@ -136,12 +145,10 @@ function renderLevel(trackIdx, levelIdx) {
     quizBody.innerHTML = quizHTML || '<p>لا يوجد اختبارات.</p>';
     document.getElementById('quizResult').innerHTML = '';
 
-    // أزرار التنقل
     const totalLevels = track.levels.length;
     document.getElementById('prevLevelBtn').disabled = levelIdx === 0;
     document.getElementById('nextLevelBtn').disabled = levelIdx === totalLevels - 1;
 
-    // زر الإكمال
     const key = track.id + '-' + lvl.id;
     const btn = document.getElementById('completeLevelBtn');
     if (completed[key]) {
@@ -261,8 +268,10 @@ function resetProgress() {
 }
 
 // ===== الأحداث =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 تم تحميل الصفحة');
     renderTracks();
+    console.log('✅ تم عرض المسارات');
 
     document.getElementById('backBtn').addEventListener('click', goBack);
     document.getElementById('prevLevelBtn').addEventListener('click', () => navigateLevel(-1));
@@ -297,5 +306,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     saveProgress();
-    console.log('🚀 المنصة جاهزة مع شرح طويل واستخدامات!');
+    console.log('🚀 المنصة جاهزة!');
 });
