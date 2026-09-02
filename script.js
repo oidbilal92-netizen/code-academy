@@ -25,19 +25,12 @@ function saveProgress() {
 
 // ===== عرض اللغات (المسارات) =====
 function renderTracks() {
-    console.log('🔄 جاري عرض المسارات...');
     const grid = document.getElementById('trackGrid');
-    if (!grid) {
-        console.error('❌ عنصر trackGrid غير موجود');
-        return;
-    }
-    
+    if (!grid) return;
     if (!APP_DATA || !APP_DATA.tracks) {
-        console.error('❌ البيانات غير موجودة');
-        grid.innerHTML = '<p style="color:red;">⚠️ لم يتم تحميل البيانات. تأكد من وجود ملف data.js</p>';
+        grid.innerHTML = '<p style="color:red;">⚠️ لم يتم تحميل البيانات</p>';
         return;
     }
-
     grid.innerHTML = APP_DATA.tracks.map((t, idx) => {
         const done = Object.keys(completed).filter(k => k.startsWith(t.id)).length;
         const total = t.levels.length;
@@ -52,13 +45,11 @@ function renderTracks() {
             </div>
         `;
     }).join('');
-
     document.getElementById('totalTracks').textContent = APP_DATA.tracks.length;
     const totalLessons = APP_DATA.tracks.reduce((s, t) => s + t.levels.length, 0);
     document.getElementById('totalLessons').textContent = totalLessons;
     document.getElementById('userScore').textContent = score;
     document.getElementById('userBadges').textContent = userBadges;
-    console.log('✅ تم عرض المسارات بنجاح');
 }
 
 // ===== فتح مسار =====
@@ -70,7 +61,7 @@ function openTrack(trackIdx) {
     renderLevel(trackIdx, 0);
 }
 
-// ===== عرض مستوى =====
+// ===== عرض مستوى (بدون فيديو) =====
 function renderLevel(trackIdx, levelIdx) {
     const track = APP_DATA.tracks[trackIdx];
     const lvl = track.levels[levelIdx];
@@ -80,7 +71,11 @@ function renderLevel(trackIdx, levelIdx) {
     document.getElementById('lessonTitle').textContent = `${track.name} - ${lvl.title}`;
     document.getElementById('levelBadge').textContent = `مستوى ${lvl.id + 1}`;
 
-    document.getElementById('lessonVideo').src = lvl.video || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+    // ✅ إخفاء الفيديو نهائياً
+    const videoSection = document.getElementById('videoSection');
+    if (videoSection) {
+        videoSection.style.display = 'none';
+    }
 
     const usesContent = document.getElementById('usesContent');
     usesContent.innerHTML = `
@@ -269,9 +264,7 @@ function resetProgress() {
 
 // ===== الأحداث =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 تم تحميل الصفحة');
     renderTracks();
-    console.log('✅ تم عرض المسارات');
 
     document.getElementById('backBtn').addEventListener('click', goBack);
     document.getElementById('prevLevelBtn').addEventListener('click', () => navigateLevel(-1));
@@ -306,5 +299,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     saveProgress();
-    console.log('🚀 المنصة جاهزة!');
+    console.log('🚀 المنصة جاهزة بدون فيديوهات!');
 });
